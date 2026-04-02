@@ -262,7 +262,7 @@ def sepN_channels(lambda_rate, n_sites=N_SITES):
     beta = 0.1  # 1/(k_B T)
 
     # site energies
-    eps = np.linspace(0.0, 1.0, n_sites)
+    eps = np.array([(i+1)/n_sites for i in range(n_sites)], dtype=np.float64)
 
     # barriers between sites
     B = 1.5 * np.ones(n_sites - 1)
@@ -282,8 +282,8 @@ def sepN_channels(lambda_rate, n_sites=N_SITES):
             new_bits[0] = 1
             new_state = bits_to_state(new_bits)
 
-            dE = eps[0] - mu_L
-            rate = np.exp(-beta * (1.0 + max(dE, 0.0)))
+            # injection from left reservoir
+            rate = np.exp(-beta * (1.5 - mu_L))
 
             # perturb ONLY empty → injection
             if state == 0:
@@ -296,10 +296,11 @@ def sepN_channels(lambda_rate, n_sites=N_SITES):
             new_bits[0] = 0
             new_state = bits_to_state(new_bits)
 
-            dE = -eps[0] + mu_L
-            rate = np.exp(-beta * (1.0 + max(dE, 0.0)))
+            # extraction to left reservoir
+            rate = np.exp(-beta * (1.5 - eps[0]))
 
             channels.append((state, new_state, rate, "L_out"))
+
 
         # ---------- RIGHT RESERVOIR ----------
         if bits[-1] == 0:
@@ -307,8 +308,8 @@ def sepN_channels(lambda_rate, n_sites=N_SITES):
             new_bits[-1] = 1
             new_state = bits_to_state(new_bits)
 
-            dE = eps[-1] - mu_R
-            rate = np.exp(-beta * (1.0 + max(dE, 0.0)))
+            # injection from right reservoir
+            rate = np.exp(-beta * (1.5 - mu_R))
 
             channels.append((state, new_state, rate, "R_in"))
 
@@ -317,8 +318,8 @@ def sepN_channels(lambda_rate, n_sites=N_SITES):
             new_bits[-1] = 0
             new_state = bits_to_state(new_bits)
 
-            dE = -eps[-1] + mu_R
-            rate = np.exp(-beta * (1.0 + max(dE, 0.0)))
+            # extraction to right reservoir
+            rate = np.exp(-beta * (1.5 - eps[-1]))
 
             channels.append((state, new_state, rate, "R_out"))
 
